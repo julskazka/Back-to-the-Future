@@ -1,4 +1,4 @@
-# 🚀 Vibe HTML Kit — Стартер для курса вайбкодинга
+# voronkii-vk (🚀 Vibe HTML Kit — Стартер для курса вайбкодинга)
 
 Это твой **стартовый проект** для создания Vibe-приложений в экосистеме Notibot.  
 Просто открой папку в Antigravity IDE и скажи агенту что ты хочешь — он сделает всё сам.
@@ -81,3 +81,4 @@ vibe-html-kit/
 | **HTML Kit** 👈 ты здесь | Новичок | HTML + Tailwind + Vanilla JS |
 | Vite Kit | Средний | React + Vite |
 | Monorepo Kit | Продвинутый | React + Node.js + SQLite |
+
