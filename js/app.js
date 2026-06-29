@@ -1,5 +1,5 @@
 // js/app.js
-// Главная точка входа приложения "Партнёрский Симулятор Дохода 2.0"
+// ПАРТНЁРСКИЙ СИМУЛЯТОР 3.0 — ENTRY POINT
 
 import { initIcons } from './utils.js';
 import { renderQuizStep, QUIZ_STEPS } from './components/quiz.js';
@@ -25,11 +25,13 @@ function render() {
     // Эран загрузки / симуляции
     appEl.innerHTML = `
       <main class="max-w-xl mx-auto px-4 pt-12 pb-8 safe-top safe-bottom">
-        <div class="card p-8 text-center space-y-6 fade-in">
-          <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div class="space-y-2">
-            <h3 class="text-lg font-bold text-slate-100">Генерация персональной модели...</h3>
-            <p class="text-xs text-slate-400">Анализ ресурсов • Расчёт потенциала • Построение связок</p>
+        <div class="dashboard-card p-8 text-center space-y-6 fade-in">
+          <div class="w-10 h-10 border-3 border-[#4F8CFF] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div class="space-y-3">
+            <span class="dashboard-badge">AI-ГЕНЕРАЦИЯ СИСТЕМЫ</span>
+            <h3 class="text-base font-extrabold text-white uppercase tracking-wider">Обработка данных...</h3>
+            <div class="font-mono text-xs text-[#4F8CFF] tracking-widest">▰▰▰▰▱▱▱</div>
+            <p class="text-xs text-[#A7B0C0] max-w-xs mx-auto">Анализ ресурсов • Расчёт потенциала • Построение связок</p>
           </div>
         </div>
       </main>
@@ -43,9 +45,9 @@ function render() {
     appEl.innerHTML = `
       <main class="max-w-xl mx-auto px-4 pt-6 pb-8 safe-top safe-bottom">
         ${renderResult(currentState.answers)}
-        <div class="text-center mt-4">
-          <button id="restart-btn" class="text-xs text-slate-400 hover:text-slate-200 underline btn-press">
-            ↺ Пройти симулятор заново
+        <div class="text-center mt-6">
+          <button id="restart-btn" class="text-xs text-[#A7B0C0] hover:text-white underline font-mono btn-press">
+            ↺ Перезапустить симулятор v3.0
           </button>
         </div>
       </main>
