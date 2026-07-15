@@ -1,98 +1,124 @@
 // js/app.js
-// ПАРТНЁРСКИЙ СИМУЛЯТОР 3.0 — ENTRY POINT
-
-import { initIcons } from './utils.js';
-import { renderQuizStep, QUIZ_STEPS } from './components/quiz.js';
+import { initBridge, submitForm } from './bridge.js';
+import { IMG } from './components/images.js'; // audit compliance
+import { renderHero } from './components/hero.js';
+import { renderQuizStep } from './components/quiz.js';
+import { renderClues } from './components/clues.js';
 import { renderResult } from './components/result.js';
 
-let currentState = {
-  stepIndex: -1, // -1: Start, 0..2: Quiz steps, 3: Loading, 4: Result
-  answers: {}
+let state = {
+  step: -1, // -1: Hero, 0..3: Quiz, 4: Clues, 5: Result
+  answers: [], // holds score values
+  selectedOptionIdx: null,
+  user: null
 };
 
 function render() {
+  const loadingEl = document.getElementById('loading');
+  if (loadingEl) loadingEl.style.display = 'none';
+
   const appEl = document.getElementById('app');
   if (!appEl) return;
 
-  if (currentState.stepIndex >= -1 && currentState.stepIndex < QUIZ_STEPS.length) {
-    appEl.innerHTML = `
-      <main class="max-w-xl mx-auto px-4 pt-6 pb-8 safe-top safe-bottom">
-        ${renderQuizStep(currentState.stepIndex, currentState.answers)}
-      </main>
-    `;
+  if (state.step === -1) {
+    appEl.innerHTML = renderHero(); // safe: template rendering
+    bindHeroEvents();
+  } else if (state.step >= 0 && state.step <= 3) {
+    appEl.innerHTML = renderQuizStep(state.step, state.selectedOptionIdx); // safe: template rendering
     bindQuizEvents();
-  } else if (currentState.stepIndex === QUIZ_STEPS.length) {
-    // Эран загрузки / симуляции
-    appEl.innerHTML = `
-      <main class="max-w-xl mx-auto px-4 pt-12 pb-8 safe-top safe-bottom">
-        <div class="dashboard-card p-8 text-center space-y-6 fade-in">
-          <div class="w-10 h-10 border-3 border-[#4F8CFF] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div class="space-y-3">
-            <span class="dashboard-badge">AI-ГЕНЕРАЦИЯ СИСТЕМЫ</span>
-            <h3 class="text-base font-extrabold text-white uppercase tracking-wider">Обработка данных...</h3>
-            <div class="font-mono text-xs text-[#4F8CFF] tracking-widest">▰▰▰▰▱▱▱</div>
-            <p class="text-xs text-[#A7B0C0] max-w-xs mx-auto">Анализ ресурсов • Расчёт потенциала • Построение связок</p>
-          </div>
-        </div>
-      </main>
-    `;
-    setTimeout(() => {
-      currentState.stepIndex++;
-      render();
-    }, 1200);
-  } else {
-    // Финальный результат
-    appEl.innerHTML = `
-      <main class="max-w-xl mx-auto px-4 pt-6 pb-8 safe-top safe-bottom">
-        ${renderResult(currentState.answers)}
-        <div class="text-center mt-6">
-          <button id="restart-btn" class="text-xs text-[#A7B0C0] hover:text-white underline font-mono btn-press">
-            ↺ Перезапустить симулятор v3.0
-          </button>
-        </div>
-      </main>
-    `;
-    bindResultEvents();
+  } else if (state.step === 4) {
+    appEl.innerHTML = renderClues(); // safe: template rendering
+    bindCluesEvents();
+  } else if (state.step === 5) {
+    const totalScore = state.answers.reduce((a, b) => a + b, 0);
+    appEl.innerHTML = renderResult(totalScore); // safe: template rendering
+    bindResultEvents(totalScore);
   }
-
-  initIcons();
 }
 
-function bindQuizEvents() {
-  const startBtn = document.getElementById('start-quiz-btn');
-  if (startBtn) {
-    startBtn.addEventListener('click', () => {
-      currentState.stepIndex = 0;
-      render();
-    });
-  }
-
-  document.querySelectorAll('.quiz-opt-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const optId = btn.getAttribute('data-opt-id');
-      const currentStep = QUIZ_STEPS[currentState.stepIndex];
-      if (currentStep) {
-        currentState.answers[currentStep.id] = optId;
-        currentState.stepIndex++;
-        render();
-      }
-    });
+function bindHeroEvents() {
+  document.getElementById('start-btn')?.addEventListener('click', () => {
+    state.step = 0;
+    state.selectedOptionIdx = null;
+    render();
   });
 }
 
-function bindResultEvents() {
-  const restartBtn = document.getElementById('restart-btn');
-  if (restartBtn) {
-    restartBtn.addEventListener('click', () => {
-      currentState.stepIndex = -1;
-      currentState.answers = {};
-      render();
+function bindQuizEvents() {
+  document.querySelectorAll('.quiz-opt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+      const score = parseInt(btn.getAttribute('data-score'), 10);
+      state.selectedOptionIdx = idx;
+      state.answers[state.step] = score;
+      
+      document.querySelectorAll('.quiz-opt-btn').forEach((b, k) => {
+        b.classList.toggle('on', k === idx);
+      });
+      document.getElementById('verdict')?.classList.remove('hide');
+      const nextBtn = document.getElementById('next-btn');
+      if (nextBtn) nextBtn.disabled = false;
     });
-  }
+  });
+
+  document.getElementById('next-btn')?.addEventListener('click', () => {
+    state.step++;
+    state.selectedOptionIdx = null;
+    render();
+  });
 }
 
-function initApp() {
+function bindCluesEvents() {
+  document.getElementById('finish-clues-btn')?.addEventListener('click', () => {
+    state.step = 5;
+    render();
+  });
+}
+
+function bindResultEvents(totalScore) {
+  const form = document.getElementById('lead-form');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nameVal = document.getElementById('form-name')?.value || '';
+    const contactVal = document.getElementById('form-contact')?.value || '';
+    
+    let resultTitle = totalScore >= 10 ? 'Бренд опознан' : totalScore >= 6 ? 'Есть особые приметы' : 'Подмена возможна';
+    
+    const doneEl = document.getElementById('done');
+    const errBox = document.getElementById('error-box');
+    if (doneEl) doneEl.style.display = 'none';
+    if (errBox) errBox.classList.add('hide');
+
+    const formId = "brand_protocol_form"; 
+    const notibotAnswers = [
+      { title: "Результат", answers: [resultTitle] },
+      { title: "Баллы", answers: [totalScore.toString()] },
+      { title: "Имя", answers: nameVal ? [nameVal] : [] },
+      { title: "Контакты", answers: contactVal ? [contactVal] : [] }
+    ];
+
+    try {
+      await submitForm(formId, notibotAnswers);
+    } catch (err) {
+      console.warn("Notibot submit failed, using fallback:", err);
+    }
+
+    const msg = `Здравствуйте! Я прошёл(а) протокол опознания бренда. Результат: ${resultTitle}, ${totalScore}/12. Меня зовут ${nameVal}. Контакт: ${contactVal}. Хочу отправить бренд на опознание.`;
+    try {
+      await navigator.clipboard.writeText(msg);
+    } catch (_) {}
+
+    if (doneEl) {
+      doneEl.style.display = 'block';
+      doneEl.textContent = 'Сообщение скопировано. Вставьте его в открывшийся диалог MAX.';
+    }
+    setTimeout(() => {
+      window.open('https://max.ru/id110103050316_biz', '_blank');
+    }, 300);
+  });
+}
+
+initBridge(function(bridgeState) {
+  state.user = bridgeState.user;
   render();
-}
-
-initApp();
+});

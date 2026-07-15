@@ -3,23 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Партнёрский Симулятор Дохода 4.0</title>
+  <title>Уберите своё лицо. Вас всё ещё узнают?</title>
 
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <!-- Notibot Bridge — СИНХРОННО, локальный файл, без defer/async -->
+  <script src="./js/notibot-bridge.js"></script>
 
   <!-- Стили проекта (Self-contained + Cache buster) -->
   <link rel="stylesheet" href="./css/styles.css?v=4.0" />
 </head>
 <body>
 
+  <!-- Экран загрузки моста -->
+  <div id="loading" class="loader-screen">
+    <div class="loader-spinner"></div>
+  </div>
+
+  <!-- Эффект шума -->
+  <div class="grain"></div>
+
   <!-- Корневой элемент приложения -->
   <div id="app"></div>
 
-  <!-- Точка входа (Standalone Bundle + Cache buster) -->
-  <script src="./js/bundle.js?v=4.0"></script>
+  <!-- Точка входа (ES Modules + Cache buster) -->
+  <script type="module" src="./js/app.js?v=4.0"></script>
 
 </body>
 </html>

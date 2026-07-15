@@ -84,3 +84,14 @@ export function initIcons() {
     window.lucide.createIcons();
   }
 }
+
+/**
+ * Рендерить верхнюю панель (шапку).
+ * @param {string} left
+ * @param {string} right
+ * @returns {string}
+ */
+export function renderTop(left, right) {
+  return `<div class="top"><span>${left}</span><span>${right}</span></div>`;
+}
+
