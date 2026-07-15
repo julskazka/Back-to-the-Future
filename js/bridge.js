@@ -9,24 +9,42 @@ const _listeners = [];
  * @param {Function} onReady — коллбэк { user, app, colors }
  */
 export function initBridge(onReady) {
+  let initialized = false;
+
+  const handleReady = (userData, appData) => {
+    if (initialized) return;
+    initialized = true;
+    _state = { user: userData, app: appData, colors: appData?.colors || null };
+    _applyTheme(_state.colors);
+    if (onReady) {
+      onReady(_state);
+    }
+  };
+
   if (!window.notibot) {
     console.warn("Notibot Bridge SDK не найден на странице, запуск в режиме браузера.");
-    if (onReady) {
-      onReady({ user: { displayName: 'Гость', balance: 0 }, app: {}, colors: null });
-    }
+    handleReady({ displayName: 'Гость', balance: 0 }, {});
+    return;
+  }
+
+  // Если SDK уже успел получить данные
+  if (window.notibot.user && window.notibot.user.id) {
+    handleReady(window.notibot.user, window.notibot.app);
     return;
   }
 
   window.notibot.onUpdate(function(user, app) {
-    _state = { user, app, colors: app.colors };
-    _applyTheme(_state.colors);
-
-    if (onReady) {
-      onReady(_state);
-      onReady = null; // Вызываем onReady только один раз
-    }
+    handleReady(user, app);
     _listeners.forEach(fn => fn(_state));
   });
+
+  // Таймаут для запуска в обычном браузере
+  setTimeout(() => {
+    if (!initialized) {
+      console.warn("Таймаут инициализации Notibot. Запуск в режиме браузера.");
+      handleReady({ displayName: 'Гость', balance: 0 }, {});
+    }
+  }, 500);
 }
 
 /** Подписаться на обновления (баланс, тема) */
