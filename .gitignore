@@ -3,4 +3,6 @@
 *.log
 node_modules/
 .gemini/
+vibe-html-kit 2/
+__MACOSX/
 
